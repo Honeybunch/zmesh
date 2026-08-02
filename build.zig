@@ -223,6 +223,9 @@ pub fn build(b: *std.Build) void {
         gltfpack_exe.root_module.linkLibrary(meshopt_lib);
 
         b.installArtifact(gltfpack_exe);
+
+        const expose_bin = b.addNamedWriteFiles("gltfpack_bin");
+        _ = expose_bin.addCopyDirectory(b.path("zig-out/bin"), "", .{});
     }
 
     const test_step = b.step("test", "Run zmesh tests");
