@@ -11,4 +11,14 @@
         "README.md",
         "LICENSE",
     },
+    .dependencies = .{
+        .meshoptimizer = .{
+            .url = "https://github.com/zeux/meshoptimizer/archive/refs/tags/v1.2.tar.gz",
+            .hash = "N-V-__8AADxPIwDjyTR8ZLnwSEmQ4ANlBy86gVRpzOWqiUc0",
+        },
+        .basisu = .{
+            .url = "https://github.com/BinomialLLC/basis_universal/archive/refs/tags/v2_10_final_snapshot.tar.gz",
+            .hash = "N-V-__8AACs4RQ8E7m8-tGqxsI-Ta3g2YvwXob6BlhZh6OeX",
+        },
+    },
 }
