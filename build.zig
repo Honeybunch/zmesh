@@ -28,8 +28,9 @@ pub fn build(b: *std.Build) void {
     };
 
     const options_step = b.addOptions();
-    inline for (std.meta.fields(@TypeOf(options))) |field| {
-        options_step.addOption(field.type, field.name, @field(options, field.name));
+    const type_info = @typeInfo(@TypeOf(options)).@"struct";
+    inline for (type_info.field_types, type_info.field_names) |field_type, field_name| {
+        options_step.addOption(field_type, field_name, @field(options, field_name));
     }
 
     const options_module = options_step.createModule();
@@ -227,10 +228,19 @@ pub fn build(b: *std.Build) void {
 
     const test_step = b.step("test", "Run zmesh tests");
 
+    const Translator = @import("translate_c").Translator;
+    const translate_c = b.dependency("translate_c", .{});
+    const translate_cgltf: Translator = .init(translate_c, .{
+        .c_source_file = b.path("libs/cgltf/cgltf.h"),
+        .target = target,
+        .optimize = optimize,
+    });
+
     const tests = b.addTest(.{
         .name = "zmesh-tests",
         .root_module = zmesh_module,
     });
+    tests.root_module.addImport("cgltf_c", translate_cgltf.mod);
     b.installArtifact(tests);
 
     tests.root_module.linkLibrary(zmesh_lib);
