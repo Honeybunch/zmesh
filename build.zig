@@ -1,5 +1,7 @@
 const std = @import("std");
 
+pub var gltfpack_exe: ?*std.Build.Step.Compile = null;
+
 pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
     const target = b.standardTargetOptions(.{});
@@ -126,7 +128,7 @@ pub fn build(b: *std.Build) void {
     zmesh_lib.root_module.linkLibrary(meshopt_lib);
 
     if (options.gltfpack or options.gltfpack_basisu) {
-        const gltfpack_exe = b.addExecutable(.{
+        gltfpack_exe = b.addExecutable(.{
             .name = "gltfpack",
             .win32_manifest = meshopt.path("gltf/gltfpack.manifest"),
             .root_module = b.createModule(.{
