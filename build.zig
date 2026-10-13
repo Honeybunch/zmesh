@@ -147,7 +147,7 @@ pub fn build(b: *std.Build) void {
             }
         };
 
-        gltfpack_exe.root_module.addCSourceFiles(.{
+        gltfpack_exe.?.root_module.addCSourceFiles(.{
             .root = meshopt.path(""),
             .files = &.{
                 "gltf/animation.cpp",
@@ -219,13 +219,13 @@ pub fn build(b: *std.Build) void {
             basisu_lib.root_module.addIncludePath(basisu.path("encoder"));
             basisu_lib.root_module.addIncludePath(basisu.path("transcoder"));
 
-            gltfpack_exe.root_module.addIncludePath(basisu.path(""));
-            gltfpack_exe.root_module.linkLibrary(basisu_lib);
+            gltfpack_exe.?.root_module.addIncludePath(basisu.path(""));
+            gltfpack_exe.?.root_module.linkLibrary(basisu_lib);
         }
 
-        gltfpack_exe.root_module.linkLibrary(meshopt_lib);
+        gltfpack_exe.?.root_module.linkLibrary(meshopt_lib);
 
-        b.installArtifact(gltfpack_exe);
+        b.installArtifact(gltfpack_exe.?);
     }
 
     const test_step = b.step("test", "Run zmesh tests");
