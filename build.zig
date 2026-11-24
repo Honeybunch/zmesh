@@ -253,7 +253,45 @@ pub fn build(b: *std.Build) void {
             gltfpack_exe.?.root_module.linkLibrary(basisu_lib);
         }
 
-        gltfpack_exe.?.root_module.linkLibrary(meshopt_lib);
+        const host_meshopt_lib = b.addLibrary(.{
+            .name = "host_meshopt_lib",
+            .linkage = .static,
+            .root_module = b.createModule(.{
+                .target = host_target,
+                .optimize = optimize,
+                .link_libc = true,
+                .link_libcpp = true,
+            }),
+        });
+        host_meshopt_lib.root_module.addCSourceFiles(.{
+            .root = meshopt.path(""),
+            .files = &.{
+                "src/allocator.cpp",
+                "src/clusterizer.cpp",
+                "src/indexanalyzer.cpp",
+                "src/indexgenerator.cpp",
+                "src/indexcodec.cpp",
+                "src/meshletcodec.cpp",
+                "src/meshletutils.cpp",
+                "src/opacitymap.cpp",
+                "src/overdrawoptimizer.cpp",
+                "src/partition.cpp",
+                "src/quantization.cpp",
+                "src/rasterizer.cpp",
+                "src/simplifier.cpp",
+                "src/spatialorder.cpp",
+                "src/stripifier.cpp",
+                "src/tangentspace.cpp",
+                "src/vcacheoptimizer.cpp",
+                "src/vertexcodec.cpp",
+                "src/vertexfilter.cpp",
+                "src/vfetchoptimizer.cpp",
+            },
+            .flags = &.{""},
+        });
+        host_meshopt_lib.root_module.addIncludePath(meshopt.path("src"));
+
+        gltfpack_exe.?.root_module.linkLibrary(host_meshopt_lib);
 
         b.installArtifact(gltfpack_exe.?);
     }
