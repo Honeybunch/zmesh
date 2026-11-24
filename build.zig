@@ -155,11 +155,14 @@ pub fn build(b: *std.Build) void {
     zmesh_lib.root_module.linkLibrary(meshopt_lib);
 
     if (options.gltfpack or options.gltfpack_basisu) {
+        // executable should target the host so it's runnable
+        const host_target = b.resolveTargetQuery(.{});
+
         gltfpack_exe = b.addExecutable(.{
             .name = "gltfpack",
             .win32_manifest = meshopt.path("gltf/gltfpack.manifest"),
             .root_module = b.createModule(.{
-                .target = b.resolveTargetQuery(.{}), // executable should target the host so it's runnable
+                .target = host_target,
                 .optimize = optimize,
                 .link_libc = true,
                 .link_libcpp = true,
@@ -204,7 +207,7 @@ pub fn build(b: *std.Build) void {
                 .name = "basisu_lib",
                 .linkage = .static,
                 .root_module = b.createModule(.{
-                    .target = target,
+                    .target = host_target,
                     .optimize = optimize,
                     .link_libc = true,
                     .link_libcpp = true,
