@@ -30,9 +30,9 @@ pub fn build(b: *std.Build) void {
     };
 
     const options_step = b.addOptions();
-    const type_info = @typeInfo(@TypeOf(options)).@"struct";
-    inline for (type_info.field_types, type_info.field_names) |field_type, field_name| {
-        options_step.addOption(field_type, field_name, @field(options, field_name));
+    const options_struct_info = @typeInfo(@TypeOf(options)).@"struct";
+    inline for (options_struct_info.field_names, options_struct_info.field_types) |field_name, FieldType| {
+        options_step.addOption(FieldType, field_name, @field(options, field_name));
     }
 
     const options_module = options_step.createModule();
@@ -63,7 +63,7 @@ pub fn build(b: *std.Build) void {
 
     b.installArtifact(zmesh_lib);
 
-    zmesh_lib.root_module.link_libcpp = true;
+    zmesh_lib.root_module.link_libc = true;
     if (target.result.abi != .msvc)
         zmesh_lib.root_module.link_libcpp = true;
 
@@ -82,6 +82,33 @@ pub fn build(b: *std.Build) void {
     zmesh_lib.root_module.addCSourceFile(.{
         .file = b.path("libs/cgltf/cgltf.c"),
         .flags = &.{"-std=c99"},
+    });
+
+    zmesh_lib.root_module.addCSourceFiles(.{
+        .files = &.{
+            "libs/meshoptimizer/allocator.cpp",
+            "libs/meshoptimizer/clusterizer.cpp",
+            "libs/meshoptimizer/indexanalyzer.cpp",
+            "libs/meshoptimizer/indexcodec.cpp",
+            "libs/meshoptimizer/indexgenerator.cpp",
+            "libs/meshoptimizer/meshletcodec.cpp",
+            "libs/meshoptimizer/meshletutils.cpp",
+            "libs/meshoptimizer/opacitymap.cpp",
+            "libs/meshoptimizer/overdrawoptimizer.cpp",
+            "libs/meshoptimizer/partition.cpp",
+            "libs/meshoptimizer/quantization.cpp",
+            "libs/meshoptimizer/rasterizer.cpp",
+            "libs/meshoptimizer/remesher.cpp",
+            "libs/meshoptimizer/simplifier.cpp",
+            "libs/meshoptimizer/spatialorder.cpp",
+            "libs/meshoptimizer/stripifier.cpp",
+            "libs/meshoptimizer/tangentspace.cpp",
+            "libs/meshoptimizer/vcacheoptimizer.cpp",
+            "libs/meshoptimizer/vertexcodec.cpp",
+            "libs/meshoptimizer/vertexfilter.cpp",
+            "libs/meshoptimizer/vfetchoptimizer.cpp",
+        },
+        .flags = &.{""},
     });
 
     // Meshopt is built as a static library so it can link to gltfpack and zmesh separtely
@@ -132,7 +159,7 @@ pub fn build(b: *std.Build) void {
             .name = "gltfpack",
             .win32_manifest = meshopt.path("gltf/gltfpack.manifest"),
             .root_module = b.createModule(.{
-                .target = target,
+                .target = b.resolveTargetQuery(.{}), // executable should target the host so it's runnable
                 .optimize = optimize,
                 .link_libc = true,
                 .link_libcpp = true,
@@ -246,7 +273,6 @@ pub fn build(b: *std.Build) void {
     b.installArtifact(tests);
 
     tests.root_module.linkLibrary(zmesh_lib);
-    tests.root_module.addIncludePath(b.path("libs/cgltf"));
 
     test_step.dependOn(&b.addRunArtifact(tests).step);
 }
